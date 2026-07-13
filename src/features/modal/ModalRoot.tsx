@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { UpdateModal } from "@/features/updater/UpdateModal";
 import { useModalStore } from "./store";
 import type { Artifact, ModalDescriptor } from "./types";
 
@@ -27,6 +28,7 @@ export function ModalRoot() {
       <ErrorModal active={active} onOpenChange={onOpenChange} />
       <ShortcutsModal active={active} onOpenChange={onOpenChange} />
       <ArtifactModal active={active} onOpenChange={onOpenChange} />
+      <UpdateModal active={active} onOpenChange={onOpenChange} />
     </>
   );
 }

@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { ModalRoot } from "@/features/modal";
+import { UpdateChecker } from "@/features/updater/UpdateChecker";
 import { makeQueryClient } from "@/lib/queryClient";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -15,6 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <TooltipProvider delay={300}>
         {children}
         <ModalRoot />
+        <UpdateChecker />
         <Toaster
           position="bottom-right"
           richColors
