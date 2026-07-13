@@ -1,26 +1,395 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-heading: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
   }
 }
 
-body {
-  background: var(--background);
+.rev-def-bg {
+  background: color-mix(in oklch, oklch(0.72 0.19 150) 8%, transparent);
+}
+
+.rev-usage-hit {
+  background: color-mix(in oklch, oklch(0.72 0.19 150) 16%, transparent);
+  border-radius: 3px;
+}
+
+.rev-added-gutter {
+  background: linear-gradient(
+    to right,
+    transparent 6px,
+    oklch(0.72 0.19 150) 6px,
+    oklch(0.72 0.19 150) 9px,
+    transparent 9px
+  );
+}
+
+.rev-comment-gutter {
+  background: linear-gradient(
+    to right,
+    transparent 6px,
+    oklch(0.78 0.16 75) 6px,
+    oklch(0.78 0.16 75) 9px,
+    transparent 9px
+  );
+}
+
+.rev-comment-glyph {
+  background: color-mix(in oklch, oklch(0.78 0.16 75) 30%, transparent);
+}
+
+.rev-existing-comment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%233b82f6'%3E%3Cpath d='M2 3h12a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H6l-3 3v-3H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 13px;
+  cursor: pointer;
+}
+
+@keyframes rev-refresh-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, oklch(0.82 0.17 80) 55%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 10px 2px color-mix(in oklch, oklch(0.82 0.17 80) 65%, transparent);
+  }
+}
+.rev-refresh-glow {
+  animation: rev-refresh-pulse 1.8s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+.rev-existing-comment-line {
+  background: linear-gradient(
+    to right,
+    transparent 6px,
+    oklch(0.6 0.16 250) 6px,
+    oklch(0.6 0.16 250) 9px,
+    transparent 9px
+  );
+}
+
+.rev-source-cite {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  vertical-align: middle;
+  white-space: nowrap;
+  padding: 0.1em 0.4em;
+  margin: 0 0.15em;
+  border-radius: 0.35rem;
+  border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent);
+  background: color-mix(in oklab, var(--primary) 10%, transparent);
+  color: var(--primary);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.82em;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.rev-source-cite > svg {
+  position: relative;
+  top: -0.02em;
+}
+.rev-source-cite:hover {
+  background: color-mix(in oklab, var(--primary) 22%, transparent);
+  border-color: color-mix(in oklab, var(--primary) 60%, transparent);
+}
+.rev-source-cite-static {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.82em;
+  color: var(--muted-foreground);
+}
+
+.rev-sev {
+  display: inline-block;
+  padding: 0.02em 0.45em;
+  border-radius: 0.35rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.72em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+.rev-sev-high {
+  color: #f87171;
+  background: color-mix(in oklab, #f87171 16%, transparent);
+  border: 1px solid color-mix(in oklab, #f87171 45%, transparent);
+}
+.rev-sev-med {
+  color: #fbbf24;
+  background: color-mix(in oklab, #fbbf24 16%, transparent);
+  border: 1px solid color-mix(in oklab, #fbbf24 45%, transparent);
+}
+.rev-sev-low {
+  color: #60a5fa;
+  background: color-mix(in oklab, #60a5fa 14%, transparent);
+  border: 1px solid color-mix(in oklab, #60a5fa 40%, transparent);
+}
+
+/* Summary: stronger separation + breathing room between sections. */
+.rev-summary h2 {
+  margin-top: 2.4em;
+  padding-top: 1.1em;
+  border-top: 1px solid var(--border);
+}
+.rev-summary h2:first-of-type {
+  margin-top: 0.3em;
+  padding-top: 0;
+  border-top: none;
+}
+.rev-summary h3 {
+  margin-top: 1.5em;
+}
+.rev-summary li {
+  margin: 0.4em 0;
+}
+.rev-summary p {
+  margin: 0.75em 0;
+}
+
+.rev-markdown {
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.rev-markdown > :first-child {
+  margin-top: 0;
+}
+.rev-markdown h1,
+.rev-markdown h2,
+.rev-markdown h3,
+.rev-markdown h4 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 1.1em 0 0.5em;
+}
+.rev-markdown h1 {
+  font-size: 1.25rem;
+}
+.rev-markdown h2 {
+  font-size: 1.1rem;
+}
+.rev-markdown h3 {
+  font-size: 1rem;
+}
+.rev-markdown h4 {
+  font-size: 0.9rem;
+}
+.rev-markdown p {
+  margin: 0.6em 0;
+}
+.rev-markdown ul,
+.rev-markdown ol {
+  margin: 0.6em 0;
+  padding-left: 1.4em;
+}
+.rev-markdown ul {
+  list-style: disc;
+}
+.rev-markdown ol {
+  list-style: decimal;
+}
+.rev-markdown li {
+  margin: 0.2em 0;
+}
+.rev-markdown li::marker {
+  color: var(--muted-foreground);
+}
+.rev-markdown a {
+  color: oklch(0.7 0.15 250);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.rev-markdown code {
+  background: var(--muted);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+.rev-markdown pre {
+  background: var(--muted);
+  border-radius: 8px;
+  padding: 0.8em 1em;
+  overflow-x: auto;
+  margin: 0.7em 0;
+}
+.rev-markdown pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.rev-markdown blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 0.9em;
+  margin: 0.7em 0;
+  color: var(--muted-foreground);
+}
+.rev-markdown hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 1.2em 0;
+}
+.rev-markdown table {
+  border-collapse: collapse;
+  margin: 0.7em 0;
+  display: block;
+  overflow-x: auto;
+}
+.rev-markdown th,
+.rev-markdown td {
+  border: 1px solid var(--border);
+  padding: 0.4em 0.7em;
+  text-align: left;
+}
+.rev-markdown th {
+  background: var(--muted);
+  font-weight: 600;
+}
+.rev-markdown img {
+  max-width: 100%;
+  border-radius: 6px;
+}
+.rev-markdown input[type="checkbox"] {
+  margin-right: 0.4em;
+}
+.rev-markdown sup,
+.rev-markdown sub {
+  font-size: 0.75em;
+  color: var(--muted-foreground);
+}
+.rev-markdown details {
+  margin: 0.6em 0;
+}
+.rev-markdown summary {
+  cursor: pointer;
+  font-weight: 500;
 }
