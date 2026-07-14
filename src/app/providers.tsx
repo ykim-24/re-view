@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { ModalRoot } from "@/features/modal";
 import { UpdateChecker } from "@/features/updater/UpdateChecker";
+import { CardMenuOverlay } from "@/features/card-menu/CardMenuOverlay";
 import { makeQueryClient } from "@/lib/queryClient";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -17,6 +18,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         {children}
         <ModalRoot />
         <UpdateChecker />
+        <CardMenuOverlay />
         <Toaster
           position="bottom-right"
           richColors

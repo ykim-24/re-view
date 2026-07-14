@@ -2,8 +2,16 @@
 
 /** Repo PR-list view with state, search, author, label and sort filtering. */
 
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type MouseEvent,
+} from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import {
@@ -14,6 +22,9 @@ import {
   Search,
   ExternalLink,
   ArrowLeft,
+  Bookmark,
+  BookmarkCheck,
+  Link2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { buttonVariants } from "@/components/ui/button";
@@ -21,8 +32,10 @@ import { Loader } from "@/components/Loader";
 import { cn } from "@/lib/utils";
 import { usePullRequests } from "@/hooks/usePullRequests";
 import { useRepoActions } from "@/hooks/useSavedRepos";
-import { useQueue } from "@/hooks/useQueue";
+import { useQueue, useQueueActions } from "@/hooks/useQueue";
 import { useRecentPrs } from "@/hooks/useRecentPrs";
+import { openCardMenu } from "@/features/card-menu/store";
+import type { CardAction } from "@/features/card-menu/types";
 import { Select } from "@/components/Select";
 import { Tooltip } from "@/components/Tooltip";
 import { prKey } from "@/lib/pr-key";
@@ -472,13 +485,14 @@ interface PrCardProps {
   pr: PullRequestSummary;
 }
 
-function PrCard({ owner, repo, pr }: PrCardProps) {
+function copyLink(url: string) {
+  navigator.clipboard.writeText(url);
+  toast.success("Link copied");
+}
+
+function PrCardBody({ pr }: { pr: PullRequestSummary }) {
   return (
-    <Link
-      data-pr-card="true"
-      href={`/pr/${owner}/${repo}/${pr.number}`}
-      className="flex h-36 flex-col rounded-xl border bg-card p-3 transition-colors hover:border-primary/50 hover:bg-muted/50"
-    >
+    <div className="flex h-36 flex-col rounded-xl border bg-card p-3 transition-colors hover:border-primary/50 hover:bg-muted/50">
       <div className="flex items-center justify-between">
         <StateIcon pr={pr} />
         <span className="text-[10px] text-muted-foreground">
@@ -497,6 +511,74 @@ function PrCard({ owner, repo, pr }: PrCardProps) {
         </span>
         {pr.labels[0] && <LabelChip label={pr.labels[0]} />}
       </div>
+    </div>
+  );
+}
+
+function PrCard({ owner, repo, pr }: PrCardProps) {
+  const queue = useQueue();
+  const { addToReview, removeFromReview } = useQueueActions();
+  const key = prKey({ owner, repo, number: pr.number });
+  const saved = (queue.data?.saved ?? []).some((p) => prKey(p) === key);
+
+  const handleContextMenu = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const r = e.currentTarget.getBoundingClientRect();
+    const snapshot: DashboardPr = {
+      owner,
+      repo,
+      number: pr.number,
+      title: pr.title,
+      author: pr.author.login,
+      url: pr.url,
+      state: pr.state,
+      updatedAt: pr.updatedAt,
+    };
+    const bookmark: CardAction = saved
+      ? {
+          id: "unbookmark",
+          icon: BookmarkCheck,
+          label: "Remove bookmark",
+          accent: "hover:text-red-400",
+          onSelect: () => removeFromReview(key),
+        }
+      : {
+          id: "bookmark",
+          icon: Bookmark,
+          label: "Bookmark",
+          accent: "hover:text-amber-400",
+          onSelect: () => addToReview(snapshot),
+        };
+    openCardMenu({
+      rect: { top: r.top, left: r.left, width: r.width, height: r.height },
+      preview: <PrCardBody pr={pr} />,
+      actions: [
+        bookmark,
+        {
+          id: "github",
+          icon: ExternalLink,
+          label: "Open on GitHub",
+          accent: "hover:text-sky-400",
+          onSelect: () => window.open(pr.url, "_blank", "noopener"),
+        },
+        {
+          id: "copy",
+          icon: Link2,
+          label: "Copy link",
+          onSelect: () => copyLink(pr.url),
+        },
+      ],
+    });
+  };
+
+  return (
+    <Link
+      data-pr-card="true"
+      href={`/pr/${owner}/${repo}/${pr.number}`}
+      onContextMenu={handleContextMenu}
+      className="block"
+    >
+      <PrCardBody pr={pr} />
     </Link>
   );
 }

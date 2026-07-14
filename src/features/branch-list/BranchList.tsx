@@ -6,17 +6,33 @@
  * the repo's default branch (changeable from there).
  */
 
-import { useMemo, useRef, useState, type ChangeEvent } from "react";
+import {
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type MouseEvent,
+} from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import { ArrowLeft, ExternalLink, GitBranch, Search, Star } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  GitBranch,
+  Search,
+  Star,
+  Copy,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { buttonVariants } from "@/components/ui/button";
 import { Loader } from "@/components/Loader";
 import { Tooltip } from "@/components/Tooltip";
 import { cn } from "@/lib/utils";
 import { useBranches } from "@/hooks/useBranches";
+import { openCardMenu } from "@/features/card-menu/store";
+import type { CardAction } from "@/features/card-menu/types";
 import type { BranchSummary } from "@/domain/branch/models";
 
 interface BranchListProps {
@@ -177,34 +193,76 @@ interface BranchCardProps {
   defaultBranch: string;
 }
 
+function BranchCardBody({ branch }: { branch: BranchSummary }) {
+  return (
+    <div className="flex h-36 flex-col rounded-xl border bg-card p-3 transition-colors hover:border-primary/50 hover:bg-muted/50">
+      <div className="flex items-center justify-between">
+        <GitBranch className="h-4 w-4 text-sky-400" />
+        {branch.isDefault && (
+          <span className="flex items-center gap-1 text-[10px] text-amber-400">
+            <Star className="h-3 w-3 fill-amber-400" />
+            default
+          </span>
+        )}
+      </div>
+      <div className="mt-2 line-clamp-2 break-all font-mono text-sm font-medium">
+        {branch.name}
+      </div>
+      <div className="mt-auto truncate pt-1 font-mono text-[10px] text-muted-foreground">
+        {branch.sha.slice(0, 10)}
+      </div>
+    </div>
+  );
+}
+
 function BranchCard({ owner, repo, branch, defaultBranch }: BranchCardProps) {
   const base = branch.isDefault ? "" : defaultBranch;
   const href = `/repo/${owner}/${repo}/compare?base=${encodeURIComponent(
     base,
   )}&head=${encodeURIComponent(branch.name)}`;
 
+  const handleContextMenu = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const r = e.currentTarget.getBoundingClientRect();
+    const actions: CardAction[] = [
+      {
+        id: "github",
+        icon: ExternalLink,
+        label: "Open on GitHub",
+        accent: "hover:text-sky-400",
+        onSelect: () =>
+          window.open(
+            `https://github.com/${owner}/${repo}/tree/${branch.name}`,
+            "_blank",
+            "noopener",
+          ),
+      },
+      {
+        id: "copy",
+        icon: Copy,
+        label: "Copy branch name",
+        onSelect: () => {
+          navigator.clipboard.writeText(branch.name);
+          toast.success("Branch name copied");
+        },
+      },
+    ];
+    openCardMenu({
+      rect: { top: r.top, left: r.left, width: r.width, height: r.height },
+      preview: <BranchCardBody branch={branch} />,
+      actions,
+    });
+  };
+
   return (
     <Tooltip content={branch.name} className="block">
       <Link
         data-pr-card="true"
         href={href}
-        className="flex h-36 flex-col rounded-xl border bg-card p-3 transition-colors hover:border-primary/50 hover:bg-muted/50"
+        onContextMenu={handleContextMenu}
+        className="block"
       >
-        <div className="flex items-center justify-between">
-          <GitBranch className="h-4 w-4 text-sky-400" />
-          {branch.isDefault && (
-            <span className="flex items-center gap-1 text-[10px] text-amber-400">
-              <Star className="h-3 w-3 fill-amber-400" />
-              default
-            </span>
-          )}
-        </div>
-        <div className="mt-2 line-clamp-2 break-all font-mono text-sm font-medium">
-          {branch.name}
-        </div>
-        <div className="mt-auto truncate pt-1 font-mono text-[10px] text-muted-foreground">
-          {branch.sha.slice(0, 10)}
-        </div>
+        <BranchCardBody branch={branch} />
       </Link>
     </Tooltip>
   );
