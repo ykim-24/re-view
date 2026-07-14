@@ -187,6 +187,7 @@ function SummaryContent({
         className="rev-summary text-sm"
         onSourceClick={onSourceClick}
         severityBadges
+        allowHtml={false}
       >
         {content}
       </Markdown>

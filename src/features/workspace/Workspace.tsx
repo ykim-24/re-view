@@ -363,12 +363,14 @@ export function Workspace({ owner, repo, number }: WorkspaceProps) {
         paths={files.map((f) => f.path)}
       />
 
-      <ReviewBar
-        owner={owner}
-        repo={repo}
-        number={number}
-        prSnapshot={prSnapshot}
-      />
+      {!summaryMode && (
+        <ReviewBar
+          owner={owner}
+          repo={repo}
+          number={number}
+          prSnapshot={prSnapshot}
+        />
+      )}
     </div>
   );
 }

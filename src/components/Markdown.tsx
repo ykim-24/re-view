@@ -39,6 +39,12 @@ interface MarkdownProps {
   onSourceClick?: SourceClick;
   /** when set, inline `high`/`med`/`low` code renders as a colored severity badge */
   severityBadges?: boolean;
+  /**
+   * Parse raw HTML embedded in the markdown (default true). Turn off for
+   * AI-generated content, where stray angle brackets (TS generics, `<entities>`)
+   * would otherwise be mis-parsed as unknown HTML tags.
+   */
+  allowHtml?: boolean;
 }
 
 export function Markdown({
@@ -46,6 +52,7 @@ export function Markdown({
   className,
   onSourceClick,
   severityBadges,
+  allowHtml = true,
 }: MarkdownProps) {
   const components = useMemo<Components>(
     () => ({
@@ -56,11 +63,13 @@ export function Markdown({
     [onSourceClick, severityBadges],
   );
 
+  const rehypePlugins = allowHtml ? [rehypeRaw] : [];
+
   return (
     <div className={cn("rev-markdown", className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
+        rehypePlugins={rehypePlugins}
         urlTransform={urlTransform}
         components={components}
       >

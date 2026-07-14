@@ -108,7 +108,7 @@ export function StreamedAnswer({
   }
   return (
     <div className="text-xs">
-      <Markdown className="text-xs">{answer}</Markdown>
+      <Markdown className="text-xs" allowHtml={false}>{answer}</Markdown>
     </div>
   );
 }
