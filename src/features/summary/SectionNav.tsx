@@ -60,7 +60,7 @@ export function SectionNav({ scrollRef, content }: SectionNavProps) {
   if (sections.length < 3) return null;
 
   return (
-    <nav className="group absolute right-2 top-1/2 z-10 flex -translate-y-1/2 flex-col items-end gap-1.5">
+    <nav className="group absolute right-5 top-1/2 z-10 flex -translate-y-1/2 flex-col items-end gap-1.5">
       {sections.map((section) => (
         <SectionNavItem
           key={section.id}

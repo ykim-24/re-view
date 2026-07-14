@@ -82,7 +82,7 @@ export function SummaryView({ target, currentHeadSha, onSourceClick }: SummaryVi
         onRegenerate={handleGenerate}
       />
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+      <div ref={scrollRef} className="rev-subtle-scroll min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl px-6 py-6">
           <SummaryContent
             content={content}
