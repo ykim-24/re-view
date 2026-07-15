@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.1 — 2026-07-15
+
+Added an in-app **What's new** changelog modal (home page + update modal) that shows the latest release notes in a pressed panel. The release script now takes a markdown message and records each release in `CHANGELOG.md`.
+
 ## v0.3.0 — 2026-07-15
 
 **Tabs, branding, and review polish.**
