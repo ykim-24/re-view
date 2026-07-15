@@ -1,0 +1,47 @@
+# Changelog
+
+## v0.3.0 — 2026-07-15
+
+**Tabs, branding, and review polish.**
+
+- **Browser-style tabs** — drag to reorder (pointer-based, edge-aware hit
+  detection, snaps into place), close slides the rest left, new tabs animate in,
+  labels reveal per-character.
+- **Gecko branding** — pixel gecko as the tab-strip logo (click → home) and the
+  favicon.
+- **Standardized inputs** — the `Input` and `Textarea` share one box style: gray
+  fill, inset shadow, single blue focus outline. Search inputs autofocus.
+- **Staged comments** — each row jumps to its line in the diff; the dropdown
+  opens with an animation.
+- Lifted tab-strip / content styling and a subtle recession between them.
+
+## v0.2.3 — 2026-07-14
+
+- **Right-click context menu** on PR and branch cards — the card lifts, the
+  background blurs, and icon actions (bookmark / open on GitHub / copy) slide out
+  to the side.
+
+## v0.2.2 — 2026-07-13
+
+- Fixed AI-generated content mis-parsing stray angle brackets (e.g. `<entities>`,
+  `Array<Entity>`) as HTML tags.
+- Review bar hidden while the summary view is open.
+
+## v0.2.1 — 2026-07-13
+
+- Subtle scrollbar for the summary, and more room for the section-nav rail.
+
+## v0.2.0 — 2026-07-13
+
+- **Summary** — a persisted, sectioned overview of a PR or branch comparison
+  with clickable source citations, opened as a full-page mode.
+- **Branch compare** — pick any branch and diff it against a base, reusing the
+  full review workspace.
+- **Self-updater** — the app checks the repo for a newer version and offers an
+  in-place update; `npm run release` cuts and pushes it.
+- Lazy dependency-graph resolution to avoid rate limits.
+
+## v0.1.0 — 2026-07-13
+
+- Initial: local PR review with traceability — full-file diffs, import-graph
+  navigation, go-to-definition, inline review, auto review, and insight.

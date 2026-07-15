@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/Loader";
+import { openModal } from "@/features/modal";
 import { DISMISSED_UPDATE_KEY, useApplyUpdate } from "@/hooks/useVersionCheck";
 import type { ModalDescriptor } from "@/features/modal/types";
 import type { VersionStatus } from "@/domain/system/version";
@@ -55,6 +56,7 @@ function UpdateBody({ status, onClose }: UpdateBodyProps) {
 
   const handleUpdate = () => update.mutate();
   const handleReload = () => window.location.reload();
+  const handleChangelog = () => openModal({ type: "changelog" });
   const handleDismiss = () => {
     localStorage.setItem(DISMISSED_UPDATE_KEY, status.latestSha);
     onClose();
@@ -98,14 +100,22 @@ function UpdateBody({ status, onClose }: UpdateBodyProps) {
           {update.error.message}
         </p>
       )}
-      <div className="flex justify-end gap-2">
-        <Button variant="ghost" onClick={handleDismiss}>
-          Not now
-        </Button>
-        <Button onClick={handleUpdate} className="gap-1.5">
-          <Download className="h-4 w-4" />
-          Update now
-        </Button>
+      <div className="flex items-center justify-between gap-2">
+        <button
+          onClick={handleChangelog}
+          className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+        >
+          What&apos;s new
+        </button>
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={handleDismiss}>
+            Not now
+          </Button>
+          <Button onClick={handleUpdate} className="gap-1.5">
+            <Download className="h-4 w-4" />
+            Update now
+          </Button>
+        </div>
       </div>
     </div>
   );

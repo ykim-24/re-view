@@ -4,16 +4,19 @@
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { parsePrInput, parseRepoInput } from "@/lib/github-url";
 import { SavedRepos } from "@/features/dashboard/SavedRepos";
+import { openModal } from "@/features/modal";
 
 export default function Home() {
   const router = useRouter();
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  const handleWhatsNew = () => openModal({ type: "changelog" });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -44,6 +47,13 @@ export default function Home() {
         <p className="mt-2 text-muted-foreground">
           Add a repository to review its pull requests.
         </p>
+        <button
+          onClick={handleWhatsNew}
+          className="mt-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <Sparkles className="h-3.5 w-3.5 text-sky-400" />
+          What&apos;s new
+        </button>
 
         <form onSubmit={handleSubmit} className="mt-8 flex gap-2">
           <Input

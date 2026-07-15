@@ -108,3 +108,22 @@ Conventions:
 
 - Append `?loading` to any PR URL to preview the loading state.
 - Editors disable Monaco's built-in peek/go-to-def; navigation is our right-side drawer.
+
+## Releases & self-update
+
+Single-user, git-clone-run tool, so updates are git-based (no deploy):
+
+- **Cut a release:** `npm run release -- <patch|minor|major> "<changelog message (markdown)>"`
+  (`scripts/release.sh`). It requires a clean tree + a message, runs `tsc`/`lint`,
+  bumps `package.json`, prepends the entry to `CHANGELOG.md`, commits `release: vX.Y.Z`,
+  tags, and pushes. The message is markdown and becomes the changelog entry.
+- **Self-updater:** `/api/version` compares the local checkout against the remote
+  default branch; `useVersionCheck` polls it and `UpdateChecker` opens the `update`
+  modal when behind. `/api/update` fast-forwards (+ `npm install` on dep changes).
+- **Changelog:** `CHANGELOG.md` (newest-first) is served by `/api/changelog` and
+  rendered (markdown, `allowHtml={false}`) in the `changelog` modal —
+  `openModal({ type: "changelog" })`, reachable from the update modal and the home
+  "What's new" link.
+- The tab bar (`features/tabs`) is browser-style: persisted, drag-reorder
+  (`useTabReorder`, pointer-based + FLIP), gecko logo → home. `Input`/`Textarea`
+  share one box style (gray fill, inset shadow, single blue focus).

@@ -13,6 +13,7 @@ export type ModalDescriptor =
   | { type: "error"; title: string; message: string }
   | { type: "shortcuts" }
   | { type: "artifact"; artifact: Artifact }
-  | { type: "update"; status: VersionStatus };
+  | { type: "update"; status: VersionStatus }
+  | { type: "changelog" };
 
 export type ModalType = ModalDescriptor["type"];

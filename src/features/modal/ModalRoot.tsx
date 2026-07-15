@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { UpdateModal } from "@/features/updater/UpdateModal";
+import { ChangelogModal } from "@/features/updater/ChangelogModal";
 import { useModalStore } from "./store";
 import type { Artifact, ModalDescriptor } from "./types";
 
@@ -29,6 +30,7 @@ export function ModalRoot() {
       <ShortcutsModal active={active} onOpenChange={onOpenChange} />
       <ArtifactModal active={active} onOpenChange={onOpenChange} />
       <UpdateModal active={active} onOpenChange={onOpenChange} />
+      <ChangelogModal active={active} onOpenChange={onOpenChange} />
     </>
   );
 }
