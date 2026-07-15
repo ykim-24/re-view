@@ -36,9 +36,11 @@ export default function Home() {
   };
 
   return (
-    <main className="flex-1 overflow-y-auto px-6 py-16">
+    <main className="flex-1 overflow-y-auto px-6 pb-16 pt-32">
       <div className="mx-auto w-full max-w-3xl">
-        <h1 className="text-3xl font-semibold tracking-tight">re:view</h1>
+        <div className="relative inline-block">
+          <h1 className="text-3xl font-semibold tracking-tight">re:view</h1>
+        </div>
         <p className="mt-2 text-muted-foreground">
           Add a repository to review its pull requests.
         </p>

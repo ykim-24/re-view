@@ -39,6 +39,9 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-tab-strip: var(--tab-strip);
+  --color-tab-surface: var(--tab-surface);
+  --color-tab-surface-hover: var(--tab-surface-hover);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -63,6 +66,9 @@
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
+  --tab-strip: oklch(0.9 0 0);
+  --tab-surface: oklch(0.96 0 0);
+  --tab-surface-hover: oklch(0.93 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
@@ -98,6 +104,9 @@
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
+  --tab-strip: oklch(0.32 0 0);
+  --tab-surface: oklch(0.2 0 0);
+  --tab-surface-hover: oklch(0.26 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);

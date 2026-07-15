@@ -188,10 +188,11 @@ export function RepoView({ owner, repo }: { owner: string; repo: string }) {
         <div className="relative min-w-[200px] flex-1">
           <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
+            autoFocus
             value={search}
             onChange={handleSearchChange}
             placeholder="Filter by title, #number, author…"
-            className="h-8 pl-7"
+            className="h-8 pl-8"
           />
         </div>
 

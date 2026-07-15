@@ -6,8 +6,9 @@
  * staged inline comments.
  */
 
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from "react";
 import { createPortal } from "react-dom";
+import { gsap } from "gsap";
 import { toast } from "sonner";
 import {
   Check,
@@ -24,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Tooltip } from "@/components/Tooltip";
 import { useReviewStore } from "./store";
+import { useWorkspaceStore } from "@/features/workspace/store";
 import { useSubmitReview } from "@/hooks/useSubmitReview";
 import { useQueueActions } from "@/hooks/useQueue";
 import type {
@@ -203,6 +205,33 @@ function CommentsPanel({
 }: CommentsPanelProps) {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState<PanelPos | null>(null);
+  const animated = useRef(false);
+  const selectFile = useWorkspaceStore((s) => s.selectFile);
+  const requestRevealLine = useWorkspaceStore((s) => s.requestRevealLine);
+
+  const handleJump = (draft: InlineCommentDraft) => {
+    selectFile(draft.path);
+    requestRevealLine(draft.path, draft.line, draft.side === "LEFT" ? "base" : "head");
+    onClose();
+  };
+
+  useLayoutEffect(() => {
+    if (!pos || animated.current || !panelRef.current) return;
+    animated.current = true;
+    gsap.fromTo(
+      panelRef.current,
+      { y: 10, opacity: 0, scale: 0.97 },
+      {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        duration: 0.2,
+        ease: "power3.out",
+        transformOrigin: "bottom right",
+        clearProps: "transform,opacity",
+      },
+    );
+  }, [pos]);
 
   useEffect(() => {
     const el = triggerRef.current;
@@ -210,7 +239,7 @@ function CommentsPanel({
       const r = el.getBoundingClientRect();
       // Anchor above the trigger, right edges aligned (so it stays on-screen).
       setPos({
-        bottom: window.innerHeight - r.top + 8,
+        bottom: window.innerHeight - r.top + 16,
         right: Math.max(12, window.innerWidth - r.right),
       });
     }
@@ -253,6 +282,7 @@ function CommentsPanel({
             draft={draft}
             index={i}
             onRemove={onRemove}
+            onJump={handleJump}
           />
         ))}
       </div>
@@ -265,16 +295,23 @@ interface DraftRowProps {
   draft: InlineCommentDraft;
   index: number;
   onRemove(index: number): void;
+  onJump(draft: InlineCommentDraft): void;
 }
 
-function DraftRow({ draft, index, onRemove }: DraftRowProps) {
+function DraftRow({ draft, index, onRemove, onJump }: DraftRowProps) {
   const handleRemove = () => onRemove(index);
+  const handleJump = () => onJump(draft);
   return (
     <div className="border-b px-3 py-2 last:border-0">
       <div className="flex items-center justify-between gap-2">
-        <span className="truncate font-mono text-xs text-muted-foreground">
-          {fileLabel(draft.path)}:{draft.line}
-        </span>
+        <Tooltip content="Jump to this line">
+          <button
+            onClick={handleJump}
+            className="truncate font-mono text-xs text-muted-foreground hover:text-foreground hover:underline"
+          >
+            {fileLabel(draft.path)}:{draft.line}
+          </button>
+        </Tooltip>
         <button
           onClick={handleRemove}
           className="shrink-0 text-muted-foreground hover:text-destructive"
