@@ -2,11 +2,16 @@
 
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { closeModal } from "./store";
 import { UpdateModal } from "@/features/updater/UpdateModal";
 import { ChangelogModal } from "@/features/updater/ChangelogModal";
 import { useModalStore } from "./store";
@@ -31,7 +36,41 @@ export function ModalRoot() {
       <ArtifactModal active={active} onOpenChange={onOpenChange} />
       <UpdateModal active={active} onOpenChange={onOpenChange} />
       <ChangelogModal active={active} onOpenChange={onOpenChange} />
+      <ConfirmModal active={active} onOpenChange={onOpenChange} />
     </>
+  );
+}
+
+function ConfirmModal({ active, onOpenChange }: ModalProps) {
+  const data = active?.type === "confirm" ? active : null;
+  const confirmVariant = data?.destructive ? "destructive" : "default";
+
+  const handleConfirm = () => {
+    closeModal();
+    data?.onConfirm();
+  };
+
+  return (
+    <Dialog open={data !== null} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{data?.title ?? "Confirm"}</DialogTitle>
+          <DialogDescription className="whitespace-pre-wrap wrap-break-words">
+            {data?.message}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose
+            className={cn(buttonVariants({ variant: "outline" }))}
+          >
+            {data?.cancelLabel ?? "Cancel"}
+          </DialogClose>
+          <Button variant={confirmVariant} onClick={handleConfirm}>
+            {data?.confirmLabel ?? "Confirm"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

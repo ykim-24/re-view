@@ -14,6 +14,15 @@ export type ModalDescriptor =
   | { type: "shortcuts" }
   | { type: "artifact"; artifact: Artifact }
   | { type: "update"; status: VersionStatus }
-  | { type: "changelog" };
+  | { type: "changelog" }
+  | {
+      type: "confirm";
+      title: string;
+      message: string;
+      confirmLabel?: string;
+      cancelLabel?: string;
+      destructive?: boolean;
+      onConfirm(): void;
+    };
 
 export type ModalType = ModalDescriptor["type"];
