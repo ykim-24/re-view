@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.4.0 — 2026-07-20
+
+**Custom Integrations** — build small local automations as apps. Each integration owns *flows* (its capabilities); a flow is a canvas of *components*, starting with a **Button** whose click logic you write in a sandboxed editor with `fetch`, encrypted `secrets`, `log`, a shared `ctx`, and cross-component `components.<key>` calls (`.output` / `.run()`). Includes an encrypted secrets vault, verbose run logs, a categorized component palette, and editor autocomplete of the runtime surface. Reach it from the home page → **Integrations**.
+
+**Unsubmitted reviews persist** — staged inline comments, the summary body, the pending event, and viewed marks now survive a reload or server restart (saved locally per PR).
+
+**Reusable UI primitives** — a portal-based right-click **context menu** and a **confirm dialog** for destructive actions.
+
 ## v0.3.1 — 2026-07-15
 
 Added an in-app **What's new** changelog modal (home page + update modal) that shows the latest release notes in a pressed panel. The release script now takes a markdown message and records each release in `CHANGELOG.md`.
