@@ -163,3 +163,11 @@ export interface SubmitReviewInput {
   body: string;
   comments: InlineCommentDraft[];
 }
+
+/** The unsubmitted state of an in-progress review, persisted per PR. */
+export interface ReviewDraftState {
+  drafts: InlineCommentDraft[];
+  body: string;
+  event: ReviewEvent;
+  viewed: string[];
+}

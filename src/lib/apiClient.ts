@@ -40,4 +40,7 @@ export const api = {
       }),
     );
   },
+  async del<T>(path: string): Promise<T> {
+    return handle<T>(await fetch(path, { method: "DELETE" }));
+  },
 };

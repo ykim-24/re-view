@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type {
   InlineCommentDraft,
+  ReviewDraftState,
   ReviewEvent,
 } from "@/domain/pull-request/models";
 
@@ -36,6 +37,8 @@ interface ReviewState {
   toggleViewed(path: string): void;
   /** idempotently mark a file viewed (used by the keyboard shortcut) */
   markViewed(path: string): void;
+  /** replace the whole review state from persistence when a PR loads */
+  hydrate(state: ReviewDraftState): void;
   /** clears staged comments/summary after a review is submitted; keeps viewed */
   clearStaged(): void;
   /** full reset when switching PRs */
@@ -88,6 +91,14 @@ export const useReviewStore = create<ReviewState>((set) => ({
       const next = new Set(s.viewedFiles);
       next.add(path);
       return { viewedFiles: next };
+    }),
+  hydrate: (state) =>
+    set({
+      drafts: state.drafts,
+      body: state.body,
+      event: state.event,
+      viewedFiles: new Set(state.viewed),
+      pending: null,
     }),
   clearStaged: () => set({ drafts: [], body: "", event: "COMMENT", pending: null }),
   reset: () =>

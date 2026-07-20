@@ -36,6 +36,7 @@ import { usePullRequest } from "@/hooks/usePullRequest";
 import { usePrHeadPoll } from "@/hooks/usePrHeadPoll";
 import { useRepoActions } from "@/hooks/useSavedRepos";
 import { useRecordRecent } from "@/hooks/useRecentPrs";
+import { useReviewDraftSync } from "@/hooks/useReviewDraft";
 import { useWorkspaceStore, type DiffMode } from "./store";
 import { useReviewStore } from "@/features/review/store";
 import { openModal } from "@/features/modal";
@@ -72,6 +73,7 @@ export function Workspace({ owner, repo, number }: WorkspaceProps) {
   const { data, isLoading, isError, error, refetch, isFetching } =
     usePullRequest(owner, repo, number);
   const headPoll = usePrHeadPoll(owner, repo, number);
+  useReviewDraftSync(owner, repo, number);
   const { saveRepo } = useRepoActions();
   const recordRecent = useRecordRecent();
   const forceLoading = useSearchParams().get("loading") !== null;
@@ -87,7 +89,6 @@ export function Workspace({ owner, repo, number }: WorkspaceProps) {
   const closeDefinition = useWorkspaceStore((s) => s.closeDefinition);
   const commitSha = useWorkspaceStore((s) => s.commitSha);
   const closeCommit = useWorkspaceStore((s) => s.closeCommit);
-  const resetReview = useReviewStore((s) => s.reset);
 
   const files = useMemo(() => data?.files ?? [], [data]);
   const selectedFile = files.find((f) => f.path === selectedPath) ?? null;
@@ -109,12 +110,11 @@ export function Workspace({ owner, repo, number }: WorkspaceProps) {
 
   useEffect(() => {
     return () => {
-      resetReview();
       closeDefinition();
       closeCommit();
       closePeek();
     };
-  }, [owner, repo, number, resetReview, closeDefinition, closeCommit, closePeek]);
+  }, [owner, repo, number, closeDefinition, closeCommit, closePeek]);
 
   useEffect(() => {
     saveRepo(owner, repo);

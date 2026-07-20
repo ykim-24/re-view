@@ -19,5 +19,7 @@ export function tabLabel(href: string): string {
     return `${parts[2] ?? "repo"}/#${parts[3] ?? ""}`;
   }
 
+  if (parts[0] === "integrations") return "integrations";
+
   return path;
 }

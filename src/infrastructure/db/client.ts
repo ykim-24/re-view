@@ -5,6 +5,30 @@ import path from "node:path";
 
 let db: Database.Database | null = null;
 
+interface ColumnInfo {
+  name: string;
+}
+
+/**
+ * Pre-create migrations that must run before the CREATE IF NOT EXISTS block.
+ * Frees the `integration` name for the app model by renaming the Phase A
+ * command-shaped `integration` table to `command` (data preserved).
+ */
+function migrateSchema(database: Database.Database): void {
+  const cols = database
+    .prepare(`PRAGMA table_info(integration)`)
+    .all() as ColumnInfo[];
+  const looksLikeCommand =
+    cols.some((c) => c.name === "code") && !cols.some((c) => c.name === "description");
+  if (!looksLikeCommand) return;
+  const commandExists = database
+    .prepare(`SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'command'`)
+    .get();
+  if (!commandExists) {
+    database.exec(`ALTER TABLE integration RENAME TO command`);
+  }
+}
+
 /** Singleton SQLite connection, stored in a gitignored local file. */
 export function getDb(): Database.Database {
   if (db) return db;
@@ -13,6 +37,8 @@ export function getDb(): Database.Database {
   mkdirSync(dir, { recursive: true });
   db = new Database(path.join(dir, "re-view.db"));
   db.pragma("journal_mode = WAL");
+
+  migrateSchema(db);
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS tracked_pr (
@@ -114,6 +140,60 @@ export function getDb(): Database.Database {
       content    TEXT NOT NULL,
       model      TEXT NOT NULL,
       created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS integration_secret (
+      name       TEXT PRIMARY KEY,
+      value_enc  TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS command (
+      id         TEXT PRIMARY KEY,
+      name       TEXT NOT NULL,
+      code       TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS integration (
+      id          TEXT PRIMARY KEY,
+      name        TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      created_at  TEXT NOT NULL,
+      updated_at  TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS flow (
+      id             TEXT PRIMARY KEY,
+      integration_id TEXT NOT NULL,
+      name           TEXT NOT NULL,
+      description    TEXT NOT NULL DEFAULT '',
+      nodes          TEXT NOT NULL DEFAULT '[]',
+      created_at     TEXT NOT NULL,
+      updated_at     TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_flow_integration
+      ON flow (integration_id);
+
+    CREATE TABLE IF NOT EXISTS component (
+      id         TEXT PRIMARY KEY,
+      type       TEXT NOT NULL,
+      name       TEXT NOT NULL,
+      config     TEXT NOT NULL DEFAULT '{}',
+      code       TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS review_draft (
+      key        TEXT PRIMARY KEY,
+      drafts     TEXT NOT NULL,
+      body       TEXT NOT NULL,
+      event      TEXT NOT NULL,
+      viewed     TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
   `);
