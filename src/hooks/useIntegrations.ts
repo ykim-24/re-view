@@ -1,37 +1,10 @@
-/** TanStack hooks for custom integrations: secrets vault and retired saved commands. */
+/** TanStack hooks for the retired Phase A saved commands (name + code). */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/apiClient";
-import type { Command, RunResult, SecretMeta } from "@/domain/integration/models";
+import type { Command, RunResult } from "@/domain/integration/models";
 
-const SECRETS_KEY = ["integration-secrets"] as const;
 const COMMANDS_KEY = ["commands"] as const;
-
-interface SecretsData {
-  secrets: SecretMeta[];
-  hasKey: boolean;
-}
-
-export function useIntegrationSecrets() {
-  return useQuery<SecretsData>({
-    queryKey: SECRETS_KEY,
-    queryFn: () => api.get<SecretsData>("/api/integrations/secrets"),
-  });
-}
-
-export function useSecretActions() {
-  const qc = useQueryClient();
-  const set = useMutation<SecretsData, Error, { name: string; value: string }>({
-    mutationFn: (body) => api.post<SecretsData>("/api/integrations/secrets", body),
-    onSuccess: (data) => qc.setQueryData(SECRETS_KEY, data),
-  });
-  const remove = useMutation<SecretsData, Error, string>({
-    mutationFn: (name) =>
-      api.del<SecretsData>(`/api/integrations/secrets?name=${encodeURIComponent(name)}`),
-    onSuccess: (data) => qc.setQueryData(SECRETS_KEY, data),
-  });
-  return { setSecret: set, removeSecret: remove };
-}
 
 export function useCommands() {
   return useQuery<{ commands: Command[] }>({

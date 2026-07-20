@@ -9,6 +9,8 @@ import type {
   Flow,
   FlowNode,
   Integration,
+  SecretMeta,
+  SecretScope,
 } from "@/domain/integration/models";
 
 const INTEGRATIONS_KEY = ["integration-apps"] as const;
@@ -135,4 +137,38 @@ export function useRunComponent() {
   >({
     mutationFn: (body) => api.post<ComponentRunResult>("/api/components/run", body),
   });
+}
+
+interface SecretsData {
+  secrets: SecretMeta[];
+  hasKey: boolean;
+}
+
+export function useIntegrationSecrets(integrationId: string) {
+  return useQuery<SecretsData>({
+    queryKey: ["integration-secrets", integrationId],
+    queryFn: () =>
+      api.get<SecretsData>(
+        `/api/integrations/secrets?integrationId=${encodeURIComponent(integrationId)}`,
+      ),
+  });
+}
+
+export function useSecretActions(integrationId: string) {
+  const qc = useQueryClient();
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["integration-secrets"] });
+  const set = useMutation<
+    { ok: true },
+    Error,
+    { name: string; value: string; scope: SecretScope }
+  >({
+    mutationFn: (body) => api.post<{ ok: true }>("/api/integrations/secrets", { integrationId, ...body }),
+    onSuccess: invalidate,
+  });
+  const remove = useMutation<{ ok: true }, Error, string>({
+    mutationFn: (id) =>
+      api.del<{ ok: true }>(`/api/integrations/secrets?id=${encodeURIComponent(id)}`),
+    onSuccess: invalidate,
+  });
+  return { setSecret: set, removeSecret: remove };
 }

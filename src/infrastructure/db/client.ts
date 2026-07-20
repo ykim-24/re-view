@@ -9,24 +9,51 @@ interface ColumnInfo {
   name: string;
 }
 
+function tableExists(database: Database.Database, name: string): boolean {
+  return Boolean(
+    database
+      .prepare(`SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?`)
+      .get(name),
+  );
+}
+
+function columns(database: Database.Database, table: string): string[] {
+  return (database.prepare(`PRAGMA table_info(${table})`).all() as ColumnInfo[]).map(
+    (c) => c.name,
+  );
+}
+
 /**
- * Pre-create migrations that must run before the CREATE IF NOT EXISTS block.
- * Frees the `integration` name for the app model by renaming the Phase A
- * command-shaped `integration` table to `command` (data preserved).
+ * Pre-create migrations that must run before the CREATE IF NOT EXISTS block:
+ * frees the `integration` name for the app model by renaming the Phase A
+ * command-shaped `integration` table to `command`, and sets aside a pre-scopes
+ * `integration_secret` table so the scoped one can be created fresh. Data is
+ * preserved and copied over in migratePost.
  */
 function migrateSchema(database: Database.Database): void {
-  const cols = database
-    .prepare(`PRAGMA table_info(integration)`)
-    .all() as ColumnInfo[];
-  const looksLikeCommand =
-    cols.some((c) => c.name === "code") && !cols.some((c) => c.name === "description");
-  if (!looksLikeCommand) return;
-  const commandExists = database
-    .prepare(`SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'command'`)
-    .get();
-  if (!commandExists) {
+  const intgCols = columns(database, "integration");
+  const looksLikeCommand = intgCols.includes("code") && !intgCols.includes("description");
+  if (looksLikeCommand && !tableExists(database, "command")) {
     database.exec(`ALTER TABLE integration RENAME TO command`);
   }
+
+  const secretCols = columns(database, "integration_secret");
+  const preScopes = secretCols.length > 0 && !secretCols.includes("scope");
+  if (preScopes && !tableExists(database, "integration_secret_old")) {
+    database.exec(`ALTER TABLE integration_secret RENAME TO integration_secret_old`);
+  }
+}
+
+/** Post-create migrations that copy preserved data into the newly-created tables. */
+function migratePost(database: Database.Database): void {
+  if (!tableExists(database, "integration_secret_old")) return;
+  database.exec(`
+    INSERT OR IGNORE INTO integration_secret
+      (id, name, value_enc, scope, integration_id, created_at, updated_at)
+    SELECT lower(hex(randomblob(16))), name, value_enc, 'global', '', created_at, created_at
+    FROM integration_secret_old;
+    DROP TABLE integration_secret_old;
+  `);
 }
 
 /** Singleton SQLite connection, stored in a gitignored local file. */
@@ -144,10 +171,17 @@ export function getDb(): Database.Database {
     );
 
     CREATE TABLE IF NOT EXISTS integration_secret (
-      name       TEXT PRIMARY KEY,
-      value_enc  TEXT NOT NULL,
-      created_at TEXT NOT NULL
+      id             TEXT PRIMARY KEY,
+      name           TEXT NOT NULL,
+      value_enc      TEXT NOT NULL,
+      scope          TEXT NOT NULL DEFAULT 'global',
+      integration_id TEXT NOT NULL DEFAULT '',
+      created_at     TEXT NOT NULL,
+      updated_at     TEXT NOT NULL
     );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_integration_secret_scope
+      ON integration_secret (scope, integration_id, name);
 
     CREATE TABLE IF NOT EXISTS command (
       id         TEXT PRIMARY KEY,
@@ -197,6 +231,8 @@ export function getDb(): Database.Database {
       updated_at TEXT NOT NULL
     );
   `);
+
+  migratePost(db);
 
   return db;
 }

@@ -26,7 +26,9 @@ export async function POST(req: Request) {
     }
     const components = getComponents(flow.nodes.map((node) => node.id));
     const ctx = isRecord(body.ctx) ? body.ctx : {};
-    return NextResponse.json(await runFlow(components, body.entryId, ctx));
+    return NextResponse.json(
+      await runFlow(components, body.entryId, ctx, flow.integrationId),
+    );
   } catch (err) {
     return errorResponse(err);
   }

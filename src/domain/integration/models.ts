@@ -5,8 +5,13 @@
  * Phase A flat-command shape, kept only until that UI is replaced.
  */
 
+export type SecretScope = "global" | "integration";
+
 export interface SecretMeta {
+  id: string;
   name: string;
+  scope: SecretScope;
+  integrationId: string;
   createdAt: string;
 }
 

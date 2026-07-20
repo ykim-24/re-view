@@ -274,13 +274,27 @@ function ComponentCard({ component, selected, onSelect, onRun, onDelete }: Compo
           </Tooltip>
         </div>
       </div>
-      <button
-        onClick={handleRun}
-        className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500"
-      >
-        <Play className="h-3.5 w-3.5" />
-        {componentLabel(component)}
-      </button>
+      {component.type === "button" && (
+        <button
+          onClick={handleRun}
+          className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500"
+        >
+          <Play className="h-3.5 w-3.5" />
+          {componentLabel(component)}
+        </button>
+      )}
+      {component.type !== "button" && (
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleRun}
+            className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:border-blue-500/50 hover:text-foreground"
+          >
+            <Play className="h-3.5 w-3.5" />
+            Run
+          </button>
+          <span className="text-xs text-muted-foreground">Connector — runs other components in order.</span>
+        </div>
+      )}
     </div>
   );
 }

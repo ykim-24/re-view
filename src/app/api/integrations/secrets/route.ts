@@ -1,17 +1,30 @@
-/** GET/POST/DELETE integration secrets (encrypted at rest; only names returned). */
+/**
+ * GET/POST/DELETE integration secrets, scoped global or per-integration. GET
+ * lists what an integration can use (its own + globals) via `?integrationId=`.
+ * Encrypted at rest; only names/metadata are returned.
+ */
 
 import { NextResponse } from "next/server";
 import {
-  listSecrets,
+  listSecretsForIntegration,
   removeSecret,
   setSecret,
 } from "@/infrastructure/db/integration-secret.repository";
 import { hasSecretKey } from "@/infrastructure/crypto/secret-box";
+import type { SecretScope } from "@/domain/integration/models";
 import { errorResponse } from "@/app/api/_error";
 
-export async function GET() {
+function toScope(value: unknown): SecretScope {
+  return value === "integration" ? "integration" : "global";
+}
+
+export async function GET(req: Request) {
+  const integrationId = new URL(req.url).searchParams.get("integrationId") ?? "";
   try {
-    return NextResponse.json({ secrets: listSecrets(), hasKey: hasSecretKey() });
+    return NextResponse.json({
+      secrets: listSecretsForIntegration(integrationId),
+      hasKey: hasSecretKey(),
+    });
   } catch (err) {
     return errorResponse(err);
   }
@@ -19,7 +32,12 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as { name?: string; value?: string };
+    const body = (await req.json()) as {
+      name?: string;
+      value?: string;
+      scope?: unknown;
+      integrationId?: string;
+    };
     if (!body.name || !body.value) {
       return NextResponse.json({ error: "name and value are required" }, { status: 400 });
     }
@@ -29,8 +47,20 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    setSecret(body.name, body.value);
-    return NextResponse.json({ secrets: listSecrets(), hasKey: true });
+    const scope = toScope(body.scope);
+    if (scope === "integration" && !body.integrationId) {
+      return NextResponse.json(
+        { error: "integrationId is required for an integration-scoped secret" },
+        { status: 400 },
+      );
+    }
+    setSecret({
+      name: body.name,
+      value: body.value,
+      scope,
+      integrationId: body.integrationId ?? "",
+    });
+    return NextResponse.json({ ok: true });
   } catch (err) {
     return errorResponse(err);
   }
@@ -38,12 +68,12 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const name = new URL(req.url).searchParams.get("name");
-    if (!name) {
-      return NextResponse.json({ error: "name is required" }, { status: 400 });
+    const id = new URL(req.url).searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
-    removeSecret(name);
-    return NextResponse.json({ secrets: listSecrets(), hasKey: hasSecretKey() });
+    removeSecret(id);
+    return NextResponse.json({ ok: true });
   } catch (err) {
     return errorResponse(err);
   }

@@ -11,8 +11,8 @@ import "server-only";
 
 import vm from "node:vm";
 import {
-  getSecretValue,
-  listSecretNames,
+  resolveSecretNames,
+  resolveSecretValue,
 } from "@/infrastructure/db/integration-secret.repository";
 import { componentKey } from "@/domain/integration/component-key";
 import { primaryHandlerCode } from "@/domain/integration/component-handlers";
@@ -84,7 +84,7 @@ interface Runtime {
   base: Record<string, unknown>;
 }
 
-function makeRuntime(): Runtime {
+function makeRuntime(integrationId: string): Runtime {
   const start = Date.now();
   const logs: RunLog[] = [];
   const prefix = { current: "" };
@@ -106,8 +106,8 @@ function makeRuntime(): Runtime {
   };
 
   const secrets = {
-    get: (name: string) => getSecretValue(name),
-    names: () => listSecretNames(),
+    get: (name: string) => resolveSecretValue(name, integrationId),
+    names: () => resolveSecretNames(integrationId),
   };
 
   const base: Record<string, unknown> = {
@@ -133,7 +133,7 @@ function makeRuntime(): Runtime {
 }
 
 async function runCode(code: string, ctx: Record<string, unknown>): Promise<ComponentRunResult> {
-  const rt = makeRuntime();
+  const rt = makeRuntime("");
   const sandbox: Record<string, unknown> = { ...rt.base, ctx };
   vm.createContext(sandbox);
   try {
@@ -170,8 +170,9 @@ export async function runFlow(
   components: Component[],
   entryId: string,
   initialCtx: Record<string, unknown>,
+  integrationId: string,
 ): Promise<ComponentRunResult> {
-  const rt = makeRuntime();
+  const rt = makeRuntime(integrationId);
   const ctx: Record<string, unknown> = { ...initialCtx };
   const byId = new Map<string, Component>();
   const byKey = new Map<string, Component>();
