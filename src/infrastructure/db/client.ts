@@ -170,6 +170,12 @@ export function getDb(): Database.Database {
       updated_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS chat_thread (
+      key        TEXT PRIMARY KEY,
+      messages   TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS integration_secret (
       id             TEXT PRIMARY KEY,
       name           TEXT NOT NULL,

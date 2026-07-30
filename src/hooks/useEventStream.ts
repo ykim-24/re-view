@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { REVEAL_CHARS_PER_MS } from "@/lib/typewriter";
 import type { GatheredFile, InsightEvent } from "@/domain/insight/events";
 
-const CHARS_PER_MS = 0.18;
 
 export interface InsightStep {
   id: string;
@@ -42,7 +42,7 @@ export function useEventStream(url: string) {
     lastTimeRef.current = time;
 
     const target = targetRef.current.length;
-    accRef.current = Math.min(target, accRef.current + dt * CHARS_PER_MS);
+    accRef.current = Math.min(target, accRef.current + dt * REVEAL_CHARS_PER_MS);
     const shown = Math.floor(accRef.current);
     if (shown !== shownRef.current) {
       shownRef.current = shown;

@@ -94,6 +94,20 @@ Conventions:
   re-runs with a second resolution hop + full definition files. The file-level button runs whole-file mode.
 - **Auto review** (top-right `Bot` button). `generate-pr-review`: gathers each changed file's full content +
   the diff + index-resolved cross-file definitions, then one Claude review (Summary · Findings · Verdict).
+- **Chat** ("Ask Lizard" — gecko button, bottom-right, `features/chat`, mounted via `ChatRoot`;
+  the square morphs into the panel and back with GSAP, and only appears on the diff-bearing
+  routes — `scopeHasCode`: a PR or a compare).
+  A tool-loop agent (`chat-agent`) rather than a fixed pipeline: `insight` (with `deep` =
+  Dig Deeper), `read_file`, `find_symbol` (repo index), `list_changed_files`. The route +
+  the workspace write `scope` into `chat.store` (owner/repo/number/head ref/open file) so
+  tools read the right blobs; a live Monaco selection shows as attachable context and the
+  selection wheel's **Ask Question** opens the chat with it attached. Streams
+  `ChatEvent`s (`domain/chat/events.ts`) — tool_start/tool_log/tool_end + token — which
+  `useChat` folds into the store (revealed via `lib/typewriter`, the same pace as insight),
+  so each answer carries its own tool trace. **One saved thread per PR** (`chat_thread`,
+  keyed by `prKey`): `useChatHistorySync` hydrates on open and debounce-saves after,
+  `useEraseChat` (the panel's eraser) drops the row. Compare views chat but don't persist —
+  their base…head isn't in the route, so threads would collide.
 - **Streaming protocol.** Both stream **newline-delimited `InsightEvent`s** (`domain/insight/events.ts`:
   plan/step_start/log/step_end/files/token). `useEventStream(url)` parses them into a live step list +
   gathered-file list + a typewriter-revealed answer; `useInsight`/`useAutoReview` are thin wrappers.

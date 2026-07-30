@@ -8,6 +8,7 @@ import { ModalRoot } from "@/features/modal";
 import { ContextMenuRoot } from "@/features/context-menu";
 import { UpdateChecker } from "@/features/updater/UpdateChecker";
 import { CardMenuOverlay } from "@/features/card-menu/CardMenuOverlay";
+import { ChatRoot } from "@/features/chat";
 import { TabBar } from "@/features/tabs/TabBar";
 import { makeQueryClient } from "@/lib/queryClient";
 
@@ -27,6 +28,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <ContextMenuRoot />
         <UpdateChecker />
         <CardMenuOverlay />
+        <ChatRoot />
         <Toaster
           position="bottom-right"
           richColors

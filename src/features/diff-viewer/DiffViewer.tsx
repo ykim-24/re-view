@@ -31,6 +31,7 @@ import { ThreadPopover } from "./ThreadPopover";
 import { SelectionRadialMenu } from "./SelectionRadialMenu";
 import { useSelectionMenu } from "./selection-menu.store";
 import { useInsightStore } from "./insight.store";
+import { useChatStore } from "@/features/chat/chat.store";
 import { InsightPanel } from "./InsightPanel";
 import { useInsight } from "@/hooks/useInsight";
 import { useInsightFeedback } from "@/hooks/useInsightFeedback";
@@ -382,6 +383,20 @@ export function DiffViewer({
     closeMenu();
   };
 
+  const handleAsk = () => {
+    if (!menuAnchor) return;
+    const { path, startLine, endLine, selectedText } = menuAnchor;
+    useChatStore.getState().openChat({
+      id: `sel-${path}-${startLine}-${endLine}`,
+      kind: "selection",
+      path,
+      startLine,
+      endLine,
+      text: selectedText,
+    });
+    closeMenu();
+  };
+
   const handleCloseInsight = () => {
     closeInsightStore();
     resetInsight();
@@ -574,6 +589,7 @@ export function DiffViewer({
           showComment={canReview}
           onComment={handleCommentClick}
           onInsight={handleInsight}
+          onAsk={handleAsk}
         />
       )}
       {composerPos && (

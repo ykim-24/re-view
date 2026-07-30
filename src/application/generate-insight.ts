@@ -11,7 +11,15 @@ import "server-only";
 
 import { anthropic } from "@/infrastructure/anthropic/client";
 import { getFileContent } from "@/infrastructure/github/pull-request.repository";
-import { resolveSymbol } from "./resolve-symbol";
+import {
+  resolveDefinition,
+  type RelatedDefinition,
+} from "./insight-context";
+import {
+  countOccurrences,
+  extractIdentifiers,
+  windowFile,
+} from "@/domain/insight/gather";
 import type {
   GatheredFile,
   InsightEvent,
@@ -28,97 +36,6 @@ export interface InsightInput {
   selectedText: string;
   deep?: boolean;
   whole?: boolean;
-}
-
-interface RelatedDefinition {
-  name: string;
-  path: string;
-  line: number;
-  snippet: string;
-}
-
-const MAX_FILE_CHARS = 20000;
-
-const KEYWORDS = new Set([
-  "const", "let", "var", "function", "return", "if", "else", "for", "while",
-  "import", "export", "from", "type", "interface", "class", "new", "await",
-  "async", "this", "true", "false", "null", "undefined", "void", "string",
-  "number", "boolean", "extends", "implements", "readonly", "static", "default",
-  "switch", "case", "break", "continue", "throw", "try", "catch", "finally",
-  "typeof", "instanceof", "enum", "namespace", "super", "yield", "delete",
-]);
-
-function extractIdentifiers(text: string): string[] {
-  const matches = text.match(/[A-Za-z_$][\w$]*/g) ?? [];
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const m of matches) {
-    if (m.length < 3 || KEYWORDS.has(m) || seen.has(m)) continue;
-    seen.add(m);
-    out.push(m);
-  }
-  return out;
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function countOccurrences(name: string, sources: string[]): number {
-  const re = new RegExp(`\\b${escapeRegExp(name)}\\b`, "g");
-  let total = 0;
-  for (const src of sources) total += (src.match(re) ?? []).length;
-  return total;
-}
-
-function windowFile(content: string, startLine: number, endLine: number): string {
-  if (content.length <= MAX_FILE_CHARS) return content;
-  const lines = content.split("\n");
-  const head = lines.slice(0, 50);
-  const from = Math.max(50, startLine - 100);
-  const to = Math.min(lines.length, endLine + 100);
-  return `${head.join("\n")}\n…\n${lines.slice(from, to).join("\n")}`;
-}
-
-interface Resolution {
-  def: RelatedDefinition | null;
-  log: string;
-}
-
-async function resolveOne(
-  input: InsightInput,
-  importerPath: string,
-  name: string,
-  full: boolean,
-): Promise<Resolution> {
-  const res = await resolveSymbol({
-    owner: input.owner,
-    repo: input.repo,
-    ref: input.headRef,
-    importerPath,
-    symbol: name,
-  }).catch(() => null);
-  if (!res) return { def: null, log: `\`${name}\` → could not resolve` };
-  if (res.kind === "external") {
-    return { def: null, log: `\`${name}\` → external module ${res.specifier ?? ""}` };
-  }
-  if (res.kind === "unresolved" || !res.content || !res.path || !res.line) {
-    return { def: null, log: `\`${name}\` → no definition found` };
-  }
-  if (res.path === importerPath) return { def: null, log: "" };
-  let snippet: string;
-  if (full) {
-    snippet = windowFile(res.content, res.line, res.line);
-  } else {
-    const lines = res.content.split("\n");
-    snippet = lines
-      .slice(res.line - 1, Math.min(lines.length, res.line + 40))
-      .join("\n");
-  }
-  return {
-    def: { name, path: res.path, line: res.line, snippet },
-    log: `Resolved \`${name}\` → ${res.path}:${res.line}`,
-  };
 }
 
 const SYSTEM_PROMPT = `You are a senior engineer giving a code reviewer a fast, high-signal insight about a snippet from a pull request. The relevant context has already been gathered for you: the selection's surrounding file, the resolved definitions of the symbols it references (followed through imports), and how often those symbols are used. Analyze from what you've been given — do NOT ask for more context or say you'd need to see more.
@@ -158,6 +75,11 @@ export function generateInsightStream(
   const deep = Boolean(input.deep);
   const maxIdentifiers = deep ? 12 : 8;
   const maxRelated = deep ? 10 : 6;
+  const target = {
+    owner: input.owner,
+    repo: input.repo,
+    ref: input.headRef,
+  };
 
   const encoder = new TextEncoder();
   return new ReadableStream<Uint8Array>({
@@ -204,7 +126,7 @@ export function generateInsightStream(
         send({ type: "step_start", id: "deps", label: "Resolving dependencies" });
         const idents = extractIdentifiers(source).slice(0, maxIdentifiers);
         for (const name of idents) {
-          const { def, log } = await resolveOne(input, input.path, name, deep);
+          const { def, log } = await resolveDefinition(target, input.path, name, deep);
           if (log) send({ type: "log", message: log });
           if (def) add(def);
         }
@@ -218,7 +140,7 @@ export function generateInsightStream(
             const names = extractIdentifiers(parent.snippet).slice(0, 6);
             for (const name of names) {
               if (related.length >= maxRelated) break;
-              const { def } = await resolveOne(input, parent.path, name, true);
+              const { def } = await resolveDefinition(target, parent.path, name, true);
               if (def) {
                 add(def);
                 send({ type: "log", message: `Resolved \`${name}\` → ${def.path}:${def.line}` });

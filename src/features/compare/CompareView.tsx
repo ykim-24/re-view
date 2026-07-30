@@ -37,6 +37,7 @@ import { useWorkspaceStore, type DiffMode } from "@/features/workspace/store";
 import { DependencyTree } from "@/features/dependency-tree/DependencyTree";
 import { ChangesPanel } from "@/features/changes-list/ChangesPanel";
 import { DiffViewer } from "@/features/diff-viewer/DiffViewer";
+import { useChatStore } from "@/features/chat/chat.store";
 import { CodeIntelPanel } from "@/features/code-intel-panel/CodeIntelPanel";
 import { FileInsightButton } from "@/features/diff-viewer/FileInsightButton";
 import { FileSpotlight } from "@/features/spotlight/FileSpotlight";
@@ -102,6 +103,20 @@ export function CompareView({ owner, repo, base, head }: CompareViewProps) {
       selectFile(files[0].path);
     }
   }, [files, selectedPath, selectFile]);
+
+  useEffect(() => {
+    const headSha = data?.head.sha;
+    if (!headSha) return;
+    useChatStore.getState().setScope({
+      kind: "compare",
+      label: `${effectiveBase}…${head} in ${owner}/${repo}`,
+      route: `/repo/${owner}/${repo}/compare`,
+      owner,
+      repo,
+      ref: headSha,
+      openPath: selectedPath ?? undefined,
+    });
+  }, [data, owner, repo, effectiveBase, head, selectedPath]);
 
   useEffect(() => {
     return () => {

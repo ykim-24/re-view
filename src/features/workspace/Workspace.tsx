@@ -39,6 +39,7 @@ import { useRecordRecent } from "@/hooks/useRecentPrs";
 import { useReviewDraftSync } from "@/hooks/useReviewDraft";
 import { useWorkspaceStore, type DiffMode } from "./store";
 import { useReviewStore } from "@/features/review/store";
+import { useChatStore } from "@/features/chat/chat.store";
 import { openModal } from "@/features/modal";
 import { LeftPanel } from "./LeftPanel";
 import { DiffViewer } from "@/features/diff-viewer/DiffViewer";
@@ -119,6 +120,21 @@ export function Workspace({ owner, repo, number }: WorkspaceProps) {
   useEffect(() => {
     saveRepo(owner, repo);
   }, [owner, repo, saveRepo]);
+
+  useEffect(() => {
+    if (!data) return;
+    const { title, head } = data.pr;
+    useChatStore.getState().setScope({
+      kind: "pr",
+      label: `pull request ${owner}/${repo}#${number} — ${title}`,
+      route: `/pr/${owner}/${repo}/${number}`,
+      owner,
+      repo,
+      number,
+      ref: head.sha,
+      openPath: selectedPath ?? undefined,
+    });
+  }, [data, owner, repo, number, selectedPath]);
 
   useEffect(() => {
     if (!data) return;
