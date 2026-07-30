@@ -21,5 +21,6 @@ export type InsightEvent =
   | { type: "step_end"; id: string }
   | { type: "files"; files: GatheredFile[] }
   | { type: "token"; text: string }
+  | { type: "reply"; text: string }
   | { type: "error"; message: string }
   | { type: "done" };

@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { useTabsStore, type Tab } from "./store";
 import { useTabReorder } from "./useTabReorder";
 import { tabLabel } from "./label";
+import { UpdateAvailableButton } from "@/features/updater/UpdateAvailableButton";
 
 export function TabBar() {
   const router = useRouter();
@@ -165,6 +166,7 @@ export function TabBar() {
       >
         <Plus className="h-4 w-4" />
       </button>
+      <UpdateAvailableButton />
     </div>
   );
 }

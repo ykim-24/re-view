@@ -19,6 +19,7 @@ export function useEventStream(url: string) {
   const [steps, setSteps] = useState<InsightStep[]>([]);
   const [files, setFiles] = useState<GatheredFile[]>([]);
   const [answer, setAnswer] = useState("");
+  const [reply, setReply] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
@@ -91,6 +92,8 @@ export function useEventStream(url: string) {
       } else if (event.type === "token") {
         targetRef.current += event.text;
         ensureRaf();
+      } else if (event.type === "reply") {
+        setReply((prev) => prev + event.text);
       } else if (event.type === "error") {
         targetRef.current += `\n\n_Error: ${event.message}_`;
         ensureRaf();
@@ -113,6 +116,7 @@ export function useEventStream(url: string) {
       setSteps([]);
       setFiles([]);
       setAnswer("");
+      setReply("");
       setIsStreaming(true);
       try {
         const res = await fetch(url, {
@@ -162,6 +166,7 @@ export function useEventStream(url: string) {
     setSteps([]);
     setFiles([]);
     setAnswer("");
+    setReply("");
     setIsStreaming(false);
   }, [stopRaf]);
 
@@ -172,5 +177,5 @@ export function useEventStream(url: string) {
     };
   }, [stopRaf]);
 
-  return { steps, files, answer, isStreaming, run, reset };
+  return { steps, files, answer, reply, isStreaming, run, reset };
 }

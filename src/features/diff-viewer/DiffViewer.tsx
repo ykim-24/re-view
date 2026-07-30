@@ -163,6 +163,13 @@ export function DiffViewer({
     top: number;
     left: number;
   } | null>(null);
+  const liveThread = useMemo(
+    () =>
+      openThread
+        ? fileThreads.find((t) => t.id === openThread.thread.id)
+        : undefined,
+    [fileThreads, openThread],
+  );
 
   const isNew = file.status === "added";
   const base = useFileContent(owner, repo, file.path, baseRef, !isNew);
@@ -597,10 +604,11 @@ export function DiffViewer({
       )}
       {openThread && number !== undefined && (
         <ThreadPopover
-          thread={openThread.thread}
+          thread={liveThread ?? openThread.thread}
           owner={owner}
           repo={repo}
           number={number}
+          headRef={headRef}
           top={openThread.top}
           left={openThread.left}
           onClose={handleCloseThread}
