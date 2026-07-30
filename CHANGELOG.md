@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.5.0 — 2026-07-30
+
+**Ask Lizard** — the gecko button in the corner of a pull request (or a branch comparison) opens a chat about the code in front of you. It uses tools instead of guessing: **Insight** on a selection (with a *deeper* second hop of definitions), reading any file at the PR's head, looking symbols up in the repo index, and listing the PR's changed files — every call shown in a collapsible trace above the answer. Highlight code and it offers itself as context, or reach it from the selection wheel's new **Ask Question** action. The square grows into the panel and folds back on close, and one conversation is kept per PR — restored on reload, erasable from the panel header.
+
+**Verify a review comment** — from any comment thread, ask whether the reviewer's point actually holds. It gathers the commented code and the definitions its symbols resolve to, streams an assessment, then drafts a reply you can post to the thread in one click.
+
+**Update button** — while the checkout is behind the remote, the tab strip shows an **Update** affordance, so an update dismissed with "Not now" stays reachable.
+
+Insight's context gathering now lives in one place, shared by the chat and the existing ⌘I pipeline, and it prefers the symbols a file actually imports — so asking about JSX no longer spends the budget resolving class names.
+
 ## v0.4.0 — 2026-07-20
 
 **Custom Integrations** — build small local automations as apps. Each integration owns *flows* (its capabilities); a flow is a canvas of *components*, starting with a **Button** whose click logic you write in a sandboxed editor with `fetch`, encrypted `secrets`, `log`, a shared `ctx`, and cross-component `components.<key>` calls (`.output` / `.run()`). Includes an encrypted secrets vault, verbose run logs, a categorized component palette, and editor autocomplete of the runtime surface. Reach it from the home page → **Integrations**.
